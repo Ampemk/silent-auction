@@ -24,6 +24,13 @@ export type AuctionItem = {
   bidsCount: number;
 };
 
+export type BidEntry = {
+  id: string;
+  amount: number; // cents
+  createdAt: number; // unix timestamp
+  bidderName: string;
+};
+
 export const mockOrgs: Organization[] = [
   { id: "org_1", slug: "riverdale-foundation", name: "Riverdale Community Foundation" },
   { id: "org_2", slug: "westside-school", name: "Westside Elementary PTA" },
