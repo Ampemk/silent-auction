@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { type Auction, type AuctionItem, type Organization } from "@/lib/auctions";
-// AuctionItem is used via itemsByAuction prop type below
+import { type Auction, type AuctionItem } from "@/lib/auctions";
+import { logoutAction } from "@/app/admin/actions";
 import { NewAuctionDrawer } from "./NewAuctionDrawer";
 
 function timeRemaining(endsAt: Date): { label: string; urgent: boolean } {
@@ -38,7 +38,7 @@ export function AuctionsDashboard({
   auctions,
   itemsByAuction,
 }: {
-  org: Organization;
+  org: { id: string; name: string };
   auctions: Auction[];
   itemsByAuction: Record<string, AuctionItem[]>;
 }) {
@@ -81,6 +81,14 @@ export function AuctionsDashboard({
               </p>
             </div>
           </div>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </header>
 

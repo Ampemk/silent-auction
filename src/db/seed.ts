@@ -1,7 +1,8 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { hash } from "bcryptjs";
 import * as schema from "./schema";
-import { organizations, auctions } from "./schema";
+import { organizations, auctions, users } from "./schema";
 
 async function seed() {
   const sqlite = new Database("sqlite.db");
@@ -42,6 +43,29 @@ async function seed() {
       status: "active",
       createdAt: now,
       updatedAt: now,
+    },
+  ]).onConflictDoNothing();
+
+  await db.insert(users).values([
+    {
+      id: "user_1",
+      email: "admin@riverdale.org",
+      firstName: "Admin",
+      lastName: "User",
+      password: await hash("password123", 12),
+      role: "admin",
+      orgId: "org_1",
+      createdAt: now,
+    },
+    {
+      id: "user_2",
+      email: "admin@westside.org",
+      firstName: "Admin",
+      lastName: "User",
+      password: await hash("password123", 12),
+      role: "admin",
+      orgId: "org_2",
+      createdAt: now,
     },
   ]).onConflictDoNothing();
 

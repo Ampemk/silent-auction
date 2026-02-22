@@ -32,6 +32,7 @@ export type TokenPayload = {
   sub: string; // user id
   email: string;
   role: "admin" | "bidder";
+  orgId: string | null;
 };
 
 async function createToken(payload: TokenPayload) {
@@ -122,7 +123,7 @@ export async function signup(data: {
     })
     .run();
 
-  await setSession({ sub: id, email: data.email, role: "bidder" });
+  await setSession({ sub: id, email: data.email, role: "bidder", orgId: null });
 
   return {
     success: true,
@@ -150,7 +151,7 @@ export async function login(data: {
     return { success: false, error: "Invalid email or password" };
   }
 
-  await setSession({ sub: user.id, email: user.email, role: user.role });
+  await setSession({ sub: user.id, email: user.email, role: user.role, orgId: user.orgId ?? null });
 
   return {
     success: true,
