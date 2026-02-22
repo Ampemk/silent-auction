@@ -180,12 +180,26 @@ export function AuctionsDashboard({
                           className={`transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40 ${isCompleted ? "opacity-60" : ""}`}
                         >
                           <td className="py-3.5 pl-6 pr-3">
-                            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                              {item.title}
-                            </p>
-                            <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-1 max-w-xs">
-                              {item.description}
-                            </p>
+                            <div className="flex items-center gap-3">
+                              {item.imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.title}
+                                  className="h-10 w-10 flex-shrink-0 rounded-md object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                                  {item.title}
+                                </p>
+                                <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-1 max-w-xs">
+                                  {item.description}
+                                </p>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-3 py-3.5 text-right">
                             <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">

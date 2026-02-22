@@ -18,6 +18,7 @@ export type AuctionItem = {
   auctionId: string;
   title: string;
   description: string;
+  imageUrl: string | null;
   currentBid: number;
   startingBid: number;
   bidsCount: number;
@@ -55,6 +56,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "Authentic 1996 Chicago Bulls jersey signed by MJ himself.",
     currentBid: 1250,
     startingBid: 500,
+    imageUrl: null,
     bidsCount: 14,
   },
   {
@@ -64,6 +66,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "Two nights for two at a boutique vineyard hotel. Includes wine tasting and private tour.",
     currentBid: 875,
     startingBid: 400,
+    imageUrl: null,
     bidsCount: 9,
   },
   {
@@ -73,6 +76,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "Commission a 24\"x36\" oil painting by local artist Dana Reeves.",
     currentBid: 320,
     startingBid: 200,
+    imageUrl: null,
     bidsCount: 5,
   },
   {
@@ -82,6 +86,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "Private dining experience at Maison Rouge. 7-course tasting menu with wine pairings.",
     currentBid: 600,
     startingBid: 600,
+    imageUrl: null,
     bidsCount: 1,
   },
   {
@@ -91,6 +96,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "Brand new, unopened Apple Vision Pro (256GB). Donated by TechForGood sponsors.",
     currentBid: 2100,
     startingBid: 1500,
+    imageUrl: null,
     bidsCount: 22,
   },
   {
@@ -100,6 +106,7 @@ export const mockAuctionItems: AuctionItem[] = [
     description: "One lucky student gets to be principal for the day.",
     currentBid: 150,
     startingBid: 50,
+    imageUrl: null,
     bidsCount: 7,
   },
 ];

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "npx tsx src/db/seed.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
