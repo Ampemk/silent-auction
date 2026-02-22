@@ -55,7 +55,6 @@ export const bids = sqliteTable("bids", {
     .notNull()
     .references(() => auctionItems.id),
   userId: text("user_id")
-    .notNull()
     .references(() => users.id),
   amount: integer("amount").notNull(), // stored in cents
   createdAt: integer("created_at").notNull(),

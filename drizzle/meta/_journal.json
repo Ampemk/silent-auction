@@ -15,6 +15,13 @@
       "when": 1771720917345,
       "tag": "0001_special_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771725630897,
+      "tag": "0002_fair_spiral",
+      "breakpoints": true
     }
   ]
 }
