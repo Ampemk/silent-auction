@@ -55,15 +55,17 @@ export default function AuctionItemCard({
   return (
     <article className="bg-card border border-border rounded-xl overflow-hidden flex flex-col transition-all hover:shadow-md">
       {/* Item Image */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
-        <Image
-          src={item.image}
-          alt={item.title}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-      </div>
+      {item.image && (
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        </div>
+      )}
 
       {/* Item Info */}
       <div className="p-4 flex-1 flex flex-col">

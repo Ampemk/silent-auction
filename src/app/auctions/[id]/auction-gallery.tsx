@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import type { Auction } from "@/lib/auction-data";
-import { MOCK_ITEMS } from "@/lib/auction-data";
+import type { Auction, AuctionItem } from "@/lib/auction-data";
 import { useBidder } from "@/lib/bidder-context";
 import AuctionItemCard from "./auction-item-card";
 import PaymentVerification from "./payment-verification";
@@ -51,11 +49,11 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function AuctionGallery({ auction }: { auction: Auction }) {
+export default function AuctionGallery({ auction, initialItems }: { auction: Auction; initialItems: AuctionItem[] }) {
   const { isVerified, bidderName } = useBidder();
   const [showPayment, setShowPayment] = useState(false);
   const [bidItem, setBidItem] = useState<string | null>(null);
-  const [items, setItems] = useState(MOCK_ITEMS);
+  const [items, setItems] = useState(initialItems);
 
   const handleBidClick = (itemId: string) => {
     if (!isVerified) {
@@ -109,18 +107,8 @@ export default function AuctionGallery({ auction }: { auction: Auction }) {
       </header>
 
       {/* Auction Info Banner */}
-      <div className="relative border-b border-border overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src={auction.coverImage}
-            alt=""
-            fill
-            className="object-cover opacity-15 blur-sm"
-            sizes="100vw"
-            aria-hidden="true"
-          />
-        </div>
-        <div className="relative max-w-5xl mx-auto px-5 py-6">
+      <div className="border-b border-border">
+        <div className="max-w-5xl mx-auto px-5 py-6">
           <Link href="/auctions" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
             <ArrowLeftIcon className="h-4 w-4" />
             All auctions

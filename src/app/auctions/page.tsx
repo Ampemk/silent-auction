@@ -1,6 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
-import { MOCK_AUCTIONS } from "@/lib/auction-data";
+import { db } from "@/db";
+import { auctions, organizations, auctionItems } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 function GavelIcon({ className }: { className?: string }) {
   return (
@@ -36,7 +37,22 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function AuctionsPage() {
+export default async function AuctionsPage() {
+  const auctionRows = await db
+    .select({
+      id: auctions.id,
+      name: auctions.name,
+      description: auctions.description,
+      endsAt: auctions.endsAt,
+      status: auctions.status,
+      organization: organizations.name,
+      itemCount: sql<number>`count(${auctionItems.id})`,
+    })
+    .from(auctions)
+    .innerJoin(organizations, eq(auctions.orgId, organizations.id))
+    .leftJoin(auctionItems, eq(auctions.id, auctionItems.auctionId))
+    .groupBy(auctions.id);
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -65,40 +81,31 @@ export default function AuctionsPage() {
       {/* Auction Cards */}
       <section className="max-w-5xl mx-auto px-5 pb-20">
         <div className="flex flex-col gap-4">
-          {MOCK_AUCTIONS.map((auction) => (
+          {auctionRows.map((auction) => (
             <Link
               key={auction.id}
               href={`/auctions/${auction.id}`}
               className="group bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <div className="flex flex-col sm:flex-row">
-                <div className="relative w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
-                  <Image
-                    src={auction.coverImage}
-                    alt={auction.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 192px"
-                  />
-                  {auction.isLive && (
-                    <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-1 rounded-full">
-                      Live
-                    </span>
-                  )}
-                </div>
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
                     <p className="text-xs font-medium text-primary uppercase tracking-wide">{auction.organization}</p>
-                    <h2 className="mt-1 text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{auction.title}</h2>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{auction.description}</p>
+                    {auction.status === "active" && (
+                      <span className="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                        Live
+                      </span>
+                    )}
                   </div>
-                  <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="font-mono">{auction.itemCount} items</span>
-                    <span className="flex items-center gap-1">
-                      <ClockIcon className="h-3.5 w-3.5" />
-                      Ends {formatDate(auction.endsAt)}
-                    </span>
-                  </div>
+                  <h2 className="mt-1 text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{auction.name}</h2>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{auction.description}</p>
+                </div>
+                <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="font-mono">{auction.itemCount} items</span>
+                  <span className="flex items-center gap-1">
+                    <ClockIcon className="h-3.5 w-3.5" />
+                    Ends {formatDate(new Date(auction.endsAt).toISOString())}
+                  </span>
                 </div>
               </div>
             </Link>

@@ -101,9 +101,11 @@ export default function BidModal({
         {/* Header with item preview */}
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="relative h-12 w-12 rounded-lg overflow-hidden flex-shrink-0">
-              <Image src={item.image} alt={item.title} fill className="object-cover" sizes="48px" />
-            </div>
+            {item.image && (
+              <div className="relative h-12 w-12 rounded-lg overflow-hidden flex-shrink-0">
+                <Image src={item.image} alt={item.title} fill className="object-cover" sizes="48px" />
+              </div>
+            )}
             <div className="min-w-0">
               <h2 className="font-semibold text-foreground text-sm truncate">{item.title}</h2>
               <p className="text-xs text-muted-foreground">
