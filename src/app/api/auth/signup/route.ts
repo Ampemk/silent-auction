@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   if (!email || !password || !firstName || !lastName) {
     return NextResponse.json(
       { success: false, error: "All fields are required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
