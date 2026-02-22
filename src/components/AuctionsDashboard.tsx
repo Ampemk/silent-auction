@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { type Auction, type AuctionItem } from "@/lib/auctions";
+import { Fragment, useState } from "react";
+import { type Auction, type AuctionItem, type BidEntry } from "@/lib/auctions";
 import { logoutAction } from "@/app/admin/actions";
 import { NewAuctionDrawer } from "./NewAuctionDrawer";
 
@@ -13,6 +13,15 @@ function timeRemaining(endsAt: Date): { label: string; urgent: boolean } {
   if (hours >= 24) return { label: `${Math.floor(hours / 24)}d ${hours % 24}h left`, urgent: false };
   if (hours > 0) return { label: `${hours}h ${minutes}m left`, urgent: hours < 3 };
   return { label: `${minutes}m left`, urgent: true };
+}
+
+function formatBidTime(createdAt: number): string {
+  return new Date(createdAt * 1000).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 const auctionStatusConfig: Record<
@@ -37,22 +46,32 @@ export function AuctionsDashboard({
   org,
   auctions,
   itemsByAuction,
+  bidsByItem,
 }: {
   org: { id: string; name: string };
   auctions: Auction[];
   itemsByAuction: Record<string, AuctionItem[]>;
+  bidsByItem: Record<string, BidEntry[]>;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerAuctionId, setDrawerAuctionId] = useState<string | null>(null);
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
 
   function openDrawer(auctionId: string) {
     setDrawerAuctionId(auctionId);
     setDrawerOpen(true);
   }
 
+  function toggleBids(itemId: string) {
+    setExpandedItemId((prev) => (prev === itemId ? null : itemId));
+  }
+
   const allItems = Object.values(itemsByAuction).flat();
+  const activeAndCompletedAuctionIds = new Set(
+    auctions.filter((a) => a.status !== "draft").map((a) => a.id)
+  );
   const totalRaised = allItems
-    .filter((i) => i.status !== "draft")
+    .filter((i) => activeAndCompletedAuctionIds.has(i.auctionId))
     .reduce((sum, i) => sum + i.currentBid, 0);
   const totalBids = allItems.reduce((sum, i) => sum + i.bidsCount, 0);
   const activeAuctionCount = auctions.filter(
@@ -98,14 +117,14 @@ export function AuctionsDashboard({
             Auctions
           </h1>
           <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Manage your organization's auctions and their items.
+            Manage your organization&apos;s auctions and their items.
           </p>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: "Total Raised", value: `$${totalRaised.toLocaleString()}`, sub: "across all active items" },
+            { label: "Total Raised", value: `$${(totalRaised / 100).toLocaleString()}`, sub: "across all active items" },
             { label: "Active Auctions", value: activeAuctionCount, sub: `${auctions.length} total` },
             { label: "Total Bids", value: totalBids, sub: "across all items" },
           ].map((stat) => (
@@ -182,59 +201,123 @@ export function AuctionsDashboard({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                    {items.map((item) => (
-                        <tr
-                          key={item.id}
-                          className={`transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40 ${isCompleted ? "opacity-60" : ""}`}
-                        >
-                          <td className="py-3.5 pl-6 pr-3">
-                            <div className="flex items-center gap-3">
-                              {item.imageUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={item.imageUrl}
-                                  alt={item.title}
-                                  className="h-10 w-10 flex-shrink-0 rounded-md object-cover"
-                                />
-                              ) : (
-                                <div className="h-10 w-10 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
-                              )}
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                                  {item.title}
-                                </p>
-                                <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-1 max-w-xs">
-                                  {item.description}
-                                </p>
+                    {items.map((item) => {
+                      const itemBids = bidsByItem[item.id] ?? [];
+                      const isExpanded = expandedItemId === item.id;
+
+                      return (
+                        <Fragment key={item.id}>
+                          <tr
+                            className={`transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40 ${isCompleted ? "opacity-60" : ""}`}
+                          >
+                            <td className="py-3.5 pl-6 pr-3">
+                              <div className="flex items-center gap-3">
+                                {item.imageUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.title}
+                                    className="h-10 w-10 flex-shrink-0 rounded-md object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-10 w-10 flex-shrink-0 rounded-md bg-zinc-100 dark:bg-zinc-800" />
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                                    {item.title}
+                                  </p>
+                                  <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-1 max-w-xs">
+                                    {item.description}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-3 py-3.5 text-right">
-                            <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-                              ${item.currentBid.toLocaleString()}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3.5 text-right">
-                            <span className="text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
-                              {item.bidsCount}
-                            </span>
-                          </td>
-                          <td className="py-3.5 pl-3 pr-6 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {!isCompleted && (
-                                <button className="rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50">
-                                  Edit
-                                </button>
-                              )}
-                              {auction.status === "active" && (
-                                <button className="rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50">
-                                  View Bids
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                    ))}
+                            </td>
+                            <td className="px-3 py-3.5 text-right">
+                              <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                                ${(item.currentBid / 100).toLocaleString()}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3.5 text-right">
+                              <span className="text-sm tabular-nums text-zinc-600 dark:text-zinc-400">
+                                {item.bidsCount}
+                              </span>
+                            </td>
+                            <td className="py-3.5 pl-3 pr-6 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                {!isCompleted && (
+                                  <button className="rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50">
+                                    Edit
+                                  </button>
+                                )}
+                                {item.bidsCount > 0 && (
+                                  <button
+                                    onClick={() => toggleBids(item.id)}
+                                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                                      isExpanded
+                                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                                    }`}
+                                  >
+                                    {isExpanded ? "Hide Bids" : "View Bids"}
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Expandable bids sub-table */}
+                          {isExpanded && (
+                            <tr>
+                              <td colSpan={4} className="bg-zinc-50 px-6 py-0 dark:bg-zinc-800/30">
+                                <table className="min-w-full">
+                                  <thead>
+                                    <tr>
+                                      <th className="py-2.5 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                                        Bidder
+                                      </th>
+                                      <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                                        Amount
+                                      </th>
+                                      <th className="py-2.5 pl-3 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                                        Time
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700/50">
+                                    {itemBids.map((bid, idx) => (
+                                      <tr key={bid.id}>
+                                        <td className="py-2.5 pr-3">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                                              {bid.bidderName}
+                                            </span>
+                                            {idx === 0 && (
+                                              <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+                                                Highest
+                                              </span>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="px-3 py-2.5 text-right">
+                                          <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                                            ${(bid.amount / 100).toLocaleString()}
+                                          </span>
+                                        </td>
+                                        <td className="py-2.5 pl-3 text-right">
+                                          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                                            {formatBidTime(bid.createdAt)}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
 
