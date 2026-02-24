@@ -168,16 +168,6 @@ async function seed() {
     .insert(users)
     .values([
       {
-        id: "user_0",
-        email: "admin@acadiawildlifecenter.org",
-        firstName: "Admin",
-        lastName: "User",
-        password: await hash("password123", 12),
-        role: "admin",
-        orgId: "org_0",
-        createdAt: now,
-      },
-      {
         id: "user_1",
         email: "admin@riverdale.org",
         firstName: "Admin",

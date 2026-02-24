@@ -252,66 +252,57 @@ export function AuctionsDashboard({
                                 {item.bidsCount > 0 && (
                                   <button
                                     onClick={() => toggleBids(item.id)}
-                                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                                    className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                                       isExpanded
                                         ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
                                         : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
                                     }`}
                                   >
                                     {isExpanded ? "Hide Bids" : "View Bids"}
+                                    <svg
+                                      className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                      viewBox="0 0 16 16"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" />
+                                    </svg>
                                   </button>
                                 )}
                               </div>
                             </td>
                           </tr>
 
-                          {/* Expandable bids sub-table */}
+                          {/* Expandable bids list */}
                           {isExpanded && (
                             <tr>
-                              <td colSpan={4} className="bg-zinc-50 px-6 py-0 dark:bg-zinc-800/30">
-                                <table className="min-w-full">
-                                  <thead>
-                                    <tr>
-                                      <th className="py-2.5 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                                        Bidder
-                                      </th>
-                                      <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                                        Amount
-                                      </th>
-                                      <th className="py-2.5 pl-3 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                                        Time
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700/50">
-                                    {itemBids.map((bid, idx) => (
-                                      <tr key={bid.id}>
-                                        <td className="py-2.5 pr-3">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                                              {bid.bidderName}
-                                            </span>
-                                            {idx === 0 && (
-                                              <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
-                                                Highest
-                                              </span>
-                                            )}
-                                          </div>
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right">
-                                          <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-                                            ${(bid.amount / 100).toLocaleString()}
+                              <td colSpan={4} className="border-t border-zinc-100 bg-zinc-50 px-6 py-3 dark:border-zinc-800 dark:bg-zinc-800/30">
+                                <div className="space-y-1">
+                                  {itemBids.map((bid, idx) => (
+                                    <div
+                                      key={bid.id}
+                                      className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                                          {bid.bidderName}
+                                        </span>
+                                        {idx === 0 && (
+                                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+                                            Highest
                                           </span>
-                                        </td>
-                                        <td className="py-2.5 pl-3 text-right">
-                                          <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                                            {formatBidTime(bid.createdAt)}
-                                          </span>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-4">
+                                        <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                                          {formatBidTime(bid.createdAt)}
+                                        </span>
+                                        <span className="min-w-[4rem] text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
+                                          ${(bid.amount / 100).toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               </td>
                             </tr>
                           )}
